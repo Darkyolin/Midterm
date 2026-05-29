@@ -911,7 +911,7 @@ function renderInventory() {
     const slot = document.createElement('div');
     slot.className = 'inv-slot';
     if (G.equipped.weapon === icon || G.equipped.armor === icon) slot.classList.add('equipped');
-    slot.innerHTML = icon + (count > 1 ? <span class="inv-count">${count}</span> : '');
+    slot.innerHTML = icon + (count > 1 ? `<span class="inv-count">${count}</span>` : '');
     slot.addEventListener('mouseenter', e => showTooltip(e, icon, info));
     slot.addEventListener('mouseleave', hideTooltip);
     slot.addEventListener('click', () => useItem(icon));
@@ -932,7 +932,7 @@ function renderQuests() {
     return;
   }
   list.innerHTML = all.map(({q,done}) =>
-    <div class="quest-item ${done?'quest-done':''}"><span class="quest-dot">${done?'✓':'◆'}</span>${q}</div>
+    `<div class="quest-item ${done?'quest-done':''}"><span class="quest-dot">${done?'✓':'◆'}</span>${q}</div>`
   ).join('');
 }
 
@@ -997,8 +997,8 @@ function loadScene(id, opts = {}) {
     G.gold += gold;
     addItem('🧪', 1);
     if (Math.random() < 0.3) addItem('💎', 1);
-    text = You pry open the ancient chest. Inside you find ${gold} gold coins, a Health Potion, and perhaps something rare!;
-    notify(Found ${gold} gold & loot!);
+    text = `You pry open the ancient chest. Inside you find ${gold} gold coins, a Health Potion, and perhaps something rare!`;
+    notify(`Found ${gold} gold & loot!`);
   }
   document.getElementById('scene-text').textContent = text;
 
@@ -1071,7 +1071,7 @@ function renderShop(scene) {
       </div>`;
     }).join('') + '</div>' +
     '<div style="padding:10px;">' +
-    scene.choices.map(c => <button class="btn btn-sm" onclick="loadScene('${c.next}')" style="width:100%;margin-top:4px;">${c.text}</button>).join('') +
+    scene.choices.map(c => `<button class="btn btn-sm" onclick="loadScene('${c.next}')" style="width:100%;margin-top:4px;">${c.text}</button>`).join('') +
     '</div>';
 }
 
@@ -1079,7 +1079,7 @@ function buyItem(icon, price) {
   if (G.gold < price) { notify('❌ Not enough gold!'); return; }
   G.gold -= price;
   addItem(icon, 1);
-  notify(Bought ${ITEMS[icon].name}!);
+  notify(`Bought ${ITEMS[icon].name}!`);
   updateHUD();
 }
 
@@ -1089,20 +1089,19 @@ function useItem(icon) {
   if (info.use === 'heal') {
     G.hp = Math.min(G.maxHp, G.hp + info.val);
     G.inventory[icon]--;
-    notify(❤️ Healed ${info.val} HP!);
+    notify(`❤️ Healed ${info.val} HP!`);
   } else if (info.use === 'mana') {
     G.mp = Math.min(G.maxMp, G.mp + info.val);
     G.inventory[icon]--;
-    notify(💧 Restored ${info.val} MP!`);
+    notify(`💧 Restored ${info.val} MP!`);
   } else if (info.use === 'elixir') {
     G.hp = Math.min(G.maxHp, G.hp + info.val);
     G.mp = Math.min(G.maxMp, G.mp + 50);
     G.inventory[icon]--;
-    notify(⚗️ Restored HP & MP!);
+    notify(`⚗️ Restored HP & MP!`);
   } else if (info.use === 'equip') {
     const slot = info.slot;
     if (G.equipped[slot]) {
-      // unequip previous
       const prev = G.equipped[slot];
       const prevInfo = ITEMS[prev];
       if (prevInfo && prevInfo.stat) {
@@ -1111,11 +1110,11 @@ function useItem(icon) {
     }
     G.equipped[slot] = icon;
     Object.entries(info.stat).forEach(([k,v]) => { if (k === 'crit') G.critChance += v; else G[k] += v; });
-    notify(Equipped ${info.name}!);
+    notify(`Equipped ${info.name}!`);
   } else if (info.use === 'sell') {
     G.gold += info.val;
     G.inventory[icon]--;
-    notify(💰 Sold for ${info.val} gold!`);
+    notify(`💰 Sold for ${info.val} gold!`);
   }
   updateHUD();
 }
@@ -1152,10 +1151,9 @@ function startCombat(enemyIdx, final = false) {
   updateEnemyHP();
 
   const log = document.getElementById('combat-log');
-  log.innerHTML = <span class="log-victory">⚔️ A ${e.name} appears!</span><br>;
+  log.innerHTML = `<span class="log-victory">⚔️ A ${e.name} appears!</span><br>`;
 
-  // Update skill button label
-  document.getElementById('btn-skill').textContent = ✨ ${G.skills[0]};
+  document.getElementById('btn-skill').textContent = `✨ ${G.skills[0]}`;
   document.getElementById('scene-panel').style.display = 'none';
 }
 
@@ -1167,7 +1165,7 @@ function updateEnemyHP() {
 
 function combatLog(msg, cls = '') {
   const log = document.getElementById('combat-log');
-  log.innerHTML += <span class="${cls}">${msg}</span><br>;
+  log.innerHTML += `<span class="${cls}">${msg}</span><br>`;
   log.scrollTop = log.scrollHeight;
 }
 
@@ -1184,13 +1182,13 @@ function combatAction(action) {
     G.mp -= skill.mp;
 
     if (skill.flee) {
-      combatLog💨 You vanish in a cloud of smoke!`, 'log-miss');
+      combatLog(`💨 You vanish in a cloud of smoke!`, 'log-miss');
       endCombat(false);
       return;
     }
     if (skill.heal) {
       G.hp = Math.min(G.maxHp, G.hp + skill.heal);
-      combatLog(${skill.icon} ${skillName}: Restored ${skill.heal} HP!, 'log-heal');
+      combatLog(`${skill.icon} ${skillName}: Restored ${skill.heal} HP!`, 'log-heal');
       updateHUD();
       enemyTurn();
       return;
@@ -1213,7 +1211,7 @@ function combatAction(action) {
     const [icon] = potions[0];
     const info = ITEMS[icon];
     useItem(icon);
-    combatLog(Used ${info.name}!, 'log-heal');
+    combatLog(`Used ${info.name}!`, 'log-heal');
     enemyTurn();
     return;
   } else if (action === 'flee') {
@@ -1237,8 +1235,8 @@ function playerAttack(atkPower, isSkill = false, silent = false, skillName = '',
 
   if (!silent) {
     const label = isSkill && skillName ? skillName : 'Attack';
-    if (isCrit) combatLog💥 CRITICAL! ${label} deals ${dmg} damage!`, 'log-crit');
-    else combatLog(⚔️ Your ${label} deals ${dmg} damage., 'log-player');
+    if (isCrit) combatLog(`💥 CRITICAL! ${label} deals ${dmg} damage!`, 'log-crit');
+    else combatLog(`⚔️ Your ${label} deals ${dmg} damage.`, 'log-player');
   }
 
   updateHUD();
@@ -1251,7 +1249,7 @@ function enemyTurn() {
   if (!G.inCombat || !currentEnemy || currentEnemy.currentHp <= 0) return;
   const dmg = Math.max(1, Math.round(currentEnemy.atk * (0.85 + Math.random() * 0.3) - G.def * 0.5));
   G.hp -= dmg;
-  combatLog(${currentEnemy.icon} ${currentEnemy.name} hits you for ${dmg} damage!, 'log-hit');
+  combatLog(`${currentEnemy.icon} ${currentEnemy.name} hits you for ${dmg} damage!`, 'log-hit');
   updateHUD();
   if (G.hp <= 0) {
     G.hp = 0;
@@ -1277,21 +1275,18 @@ function endCombat(won) {
   G.xp += xpGain;
   G.gold += goldGain;
 
-  // Loot
   let lootMsg = '';
   Object.entries(e.loot || {}).forEach(([icon, chance]) => {
     if (Math.random() < chance) {
       addItem(icon, 1);
-      lootMsg += Found ${ITEMS[icon]?.name || icon}!`;
+      lootMsg += ` Found ${ITEMS[icon]?.name || icon}!`;
     }
   });
 
-  combatLog🏆 Victory! +${xpGain} XP, +${goldGain} Gold.${lootMsg}`, 'log-victory');
+  combatLog(`🏆 Victory! +${xpGain} XP, +${goldGain} Gold.${lootMsg}`, 'log-victory');
 
-  // Complete quests
   if (G.currentScene === 'ruins' || G.currentScene === 'ruins_hint') completeQuest('Find the Eastern Ruins');
 
-  // Level up
   while (G.xp >= G.xpNext) {
     G.xp -= G.xpNext;
     G.level++;
@@ -1302,66 +1297,7 @@ function endCombat(won) {
     G.mp = G.maxMp;
     G.atk = Math.round(G.atk * 1.1);
     G.def = Math.round(G.def * 1.1);
-    notify(🎉 Level Up! Now Level ${G.level}!`);
-  }
-
-  if (isFinalBoss) {
-    setTimeout(() => showVictory(), 800);
-    return;
-  }
-
-  setTimeout(() => loadScene(G.currentScene), 1000);
-  updateHUD();
-}
-
-function showGameOver() {
-  showModal('💀', 'You Have Fallen', 'The darkness consumes you. Your journey ends here, brave adventurer... but legends are never truly forgotten.', [
-    { label: 'Try Again', action: () => { document.querySelector('#game-screen').classList.remove('active'); document.querySelector('#title-screen').classList.add('active'); } }
-  ]);
-}
-
-function showVictory() {
-  completeQuest('Find the Eastern Ruins');
-  showModal('🏆', 'Victory!', With a final blow, the Demon Lord crumbles to ash. The realm is saved! You, ${G.name} the ${G.clsName}, shall be remembered for eternity. You reached Level ${G.level}., [
-    { label: '🌟 Play Again', action: () => { document.querySelector('#game-screen').classList.remove('active'); document.querySelector('#title-screen').classList.add('active'); } }
-  ]);
-}
-
-// ============================================================
-// HELPERS
-// ============================================================
-function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-// ============================================================
-// TITLE SCREEN
-// ============================================================
-let selectedClass = null;
-
-function selectClass(el) {
-  document.querySelectorAll('.class-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedClass = el.dataset.class;
-}
-
-function startGame() {
-  if (!selectedClass) { notify('Please select a class!'); return; }
-  const nameInput = document.getElementById('player-name-input');
-  const name = nameInput.value.trim() || 'Hero';
-
-  initGame(selectedClass, name);
-
-  document.getElementById('title-screen').classList.remove('active');
-  document.getElementById('game-screen').classList.add('active');
-
-  loadScene('village');
-  addQuest('Discover what threatens Millhaven');
-}
-
-// Pre-select warrior
-document.addEventListener('DOMContentLoaded', () => {
-  const first = document.querySelector('.class-card');
-  if (first) { first.classList.add('selected'); selectedClass = 'warrior'; }
-});
+    notify(`🎉 Level Up
 </script>
 </body>
 </html>
