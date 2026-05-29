@@ -1093,7 +1093,7 @@ function useItem(icon) {
   } else if (info.use === 'mana') {
     G.mp = Math.min(G.maxMp, G.mp + info.val);
     G.inventory[icon]--;
-    notify💧 Restored ${info.val} MP!`);
+    notify(💧 Restored ${info.val} MP!`);
   } else if (info.use === 'elixir') {
     G.hp = Math.min(G.maxHp, G.hp + info.val);
     G.mp = Math.min(G.maxMp, G.mp + 50);
@@ -1115,7 +1115,7 @@ function useItem(icon) {
   } else if (info.use === 'sell') {
     G.gold += info.val;
     G.inventory[icon]--;
-    notify💰 Sold for ${info.val} gold!`);
+    notify(💰 Sold for ${info.val} gold!`);
   }
   updateHUD();
 }
@@ -1302,7 +1302,7 @@ function endCombat(won) {
     G.mp = G.maxMp;
     G.atk = Math.round(G.atk * 1.1);
     G.def = Math.round(G.def * 1.1);
-    notify🎉 Level Up! Now Level ${G.level}!`);
+    notify(🎉 Level Up! Now Level ${G.level}!`);
   }
 
   if (isFinalBoss) {
